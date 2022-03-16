@@ -1,0 +1,4 @@
+mongodb
+
+user:aniki
+password: do2dnxwvWNieYyiX

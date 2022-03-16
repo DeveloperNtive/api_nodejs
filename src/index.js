@@ -1,155 +1,95 @@
 // Se importa la libreria express
-// Asi es como se importa librerias en nodejs
 const express = require('express')
-const bodyParser = require('body-parser')
-const db = require('./db')
 const app = express()
 const port = 3000
-// const nodemon = require('nodemon')
-
-app.set('title', 'NodeJS API')
+// -----------------MongoDB--------------------
+const { MongoClient } = require('mongodb')
+const { uri, client } = require('./DB/mongo')
+// -----------------MongoDB--------------------
 
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 
-let respuesta = {
-  error: false,
-  codigo: 200,
-  mensaje: ''
-}
+MongoClient.connect(uri, function (err, db) {
+  if (!err) {
+    console.log('Database conected!')
+    db.close()
+  } else {
+    console.log('error: ' + err)
+  }
+})
 
 // Obtener
 app.get('/', (req, res) => {
-  respuesta = {
-    error: true,
-    codigo: 200,
-    mensaje: 'Punto de inicio'
-  }
-  res.send(respuesta)
+  client.connect(async err => {
+    if (!err) {
+      const collection = client.db('nodejsAPI').collection('usuarios')
+      // perform actions on the collection object
+      const result = await collection.find({}).toArray()
+      client.close()
+      res.send(result)
+    } else {
+      console.log('error: ' + err)
+    }
+  })
 })
 
 app
   .route('/usuario')
   .get((req, res) => {
-    respuesta = {
-      error: false,
-      codigo: 200,
-      mensaje: ''
-    }
-    if (db.nombre === '' || db.apellido === '') {
-      respuesta = {
-        error: true,
-        codigo: 501,
-        mensaje: 'El usuario no ha sido creado'
+    client.connect(async err => {
+      if (!err) {
+        const collection = client.db('nodejsAPI').collection('usuarios')
+        // perform actions on the collection object
+        const result = await collection.find({}).toArray()
+        client.close()
+        res.send(result)
+      } else {
+        console.log('error: ' + err)
       }
-    } else {
-      respuesta = {
-        error: false,
-        codigo: 200,
-        mensaje: 'respuesta del usuario',
-        respuesta: db
-      }
-    }
-    res.send(respuesta)
+    })
   })
   .post((req, res) => {
-    if (!req.body.nombre || !req.body.apellido) {
-      respuesta = {
-        error: true,
-        codigo: 502,
-        mensaje: 'El campo nombre y apellido son requeridos'
-      }
-    } else {
-      if (db.nombre !== '' || db.apellido !== '') {
-        respuesta = {
-          error: true,
-          codigo: 503,
-          mensaje: 'El usuario ya fue creado previamente',
-          respuesta: db
-        }
+    client.connect(async err => {
+      if (!err) {
+        const collection = client.db('nodejsAPI').collection('usuarios')
+        // perform actions on the collection object
+        const result = await collection.insertOne(req.body)
+        client.close()
+        res.send(result)
       } else {
-        db = {
-          nombre: req.body.nombre,
-          apellido: req.body.apellido
-        }
-        respuesta = {
-          error: false,
-          codigo: 200,
-          mensaje: 'Usuario creado',
-          respuesta: db
-        }
+        console.log('error: ' + err)
       }
-    }
-
-    res.send(respuesta)
+    })
   })
   .put((req, res) => {
-    if (!req.body.nombre || !req.body.apellido) {
-      respuesta = {
-        error: true,
-        codigo: 502,
-        mensaje: 'El campo nombre y apellido son requeridos'
-      }
-    } else {
-      if (db.nombre === '' || db.apellido === '') {
-        respuesta = {
-          error: true,
-          codigo: 501,
-          mensaje: 'El usuario no ha sido creado'
-        }
+    client.connect(async err => {
+      if (!err) {
+        const collection = client.db('nodejsAPI').collection('usuarios')
+        // perform actions on the collection object
+        const result = await collection.updateOne(req.body.item, {
+          $set: req.body.newValues
+        })
+        client.close()
+        res.send(result)
       } else {
-        db.usuarios = {
-          nombre: req.body.nombre,
-          apellido: req.body.apellido
-        }
-        respuesta = {
-          error: false,
-          codigo: 200,
-          mensaje: 'Usuario actualizado',
-          respuesta: db
-        }
+        console.log('error: ' + err)
       }
-    }
-
-    res.send(respuesta)
+    })
   })
-  .delete(() => {
-    if (db.nombre === '' || db.apellido === '') {
-      respuesta = {
-        error: true,
-        codigo: 501,
-        mensaje: 'El usuario no ha sido creado'
+  .delete((req, res) => {
+    client.connect(async err => {
+      if (!err) {
+        const collection = client.db('nodejsAPI').collection('usuarios')
+        // perform actions on the collection object
+        const result = await collection.deleteOne(req.body.item)
+        client.close()
+        res.send(result)
+      } else {
+        console.log('error: ' + err)
       }
-    } else {
-      respuesta = {
-        error: false,
-        codigo: 200,
-        mensaje: 'Usuario eliminado'
-      }
-      db.usuarios = {
-        nombre: '',
-        apellido: ''
-      }
-    }
-    res.send(respuesta)
+    })
   })
-
-// Obtener
-// app.get('/usuario', (req, res) => {
-//   res.send(respuesta)
-// })
-// Crear
-// app.post('/usuario', (req, res) => {
-//   res.send(req.body)
-// })
-// Actualizar
-// app.put('/usuario', (req, res) => {
-//   res.send(respuesta)
-// })
-// Eliminar
-// app.delete('/usuario', (req, res) => {
-//   res.send(respuesta)
-// })
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
