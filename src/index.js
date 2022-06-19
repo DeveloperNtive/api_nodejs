@@ -3,7 +3,8 @@ const express = require('express')
 const app = express()
 const port = 3000
 // -----------------MongoDB--------------------
-const { MongoClient } = require('mongodb')
+const { MongoClient, ObjectId } = require('mongodb')
+const { stringify } = require('nodemon/lib/utils')
 const { uri, client } = require('./DB/mongo')
 // -----------------MongoDB--------------------
 
@@ -19,8 +20,8 @@ MongoClient.connect(uri, function (err, db) {
   }
 })
 
-// Obtener
-app.get('/', (req, res) => {
+// Obtener todos los usuarios
+app.get('/', (_req, res) => {
   client.connect(async err => {
     if (!err) {
       const collection = client.db('nodejsAPI').collection('usuarios')
@@ -34,9 +35,51 @@ app.get('/', (req, res) => {
   })
 })
 
+// Obtener usuario por id en la url
+//---------------------------------
+// NOTA: para enviarla por url hay que enviarla por parametro
+//---------------------------------
+app.get('/usuario/:id', (_req, res) => {
+  client.connect(async err => {
+    if (!err) {
+      const collection = client.db('nodejsAPI').collection('usuarios')
+      // perform actions on the collection object
+      const result = await collection.find({"_id":ObjectId(_req.params.id)}).toArray()
+      client.close()
+      res.send(result)
+    } else {
+      console.log('error: ' + err)
+    }
+  })
+})
+
+// Obtener usuario por id en el body
+//----------------------------------
+// NOTA: Para enviarla por body debe enviarse asi:
+// {
+//   "_id": "623170fbdcb27a88b847723a"
+// }
+//----------------------------------
+app.get('/usuario/votar/ById', (_req, res) => {
+  client.connect(async err => {
+    if (!err) {
+      const collection = client.db('nodejsAPI').collection('usuarios')
+      // perform actions on the collection object
+      const result = await collection.find({"_id":ObjectId(_req.body._id)}).toArray()
+      // const result = await collection.find({}).toArray()
+      client.close()
+      res.send(result)
+      console.log(_req.body.item._id)
+    } else {
+      console.log('error: ' + err)
+    }
+  })
+})
+
+// Operaciones con usuario
 app
   .route('/usuario')
-  .get((req, res) => {
+  .get((_req, res) => {
     client.connect(async err => {
       if (!err) {
         const collection = client.db('nodejsAPI').collection('usuarios')
@@ -44,6 +87,21 @@ app
         const result = await collection.find({}).toArray()
         client.close()
         res.send(result)
+        console.log('response: '+ JSON.stringify(result[0]))
+      } else {
+        console.log('error: ' + err)
+      }
+    })
+  })
+  .get((_req, res) => {
+    client.connect(async err => {
+      if (!err) {
+        const collection = client.db('nodejsAPI').collection('usuarios')
+        // perform actions on the collection object
+        const result = await collection.find(_req.body.item).toArray()
+        client.close()
+        res.send(result)
+        console.log('response: '+ JSON.stringify(result[0]))
       } else {
         console.log('error: ' + err)
       }
@@ -57,7 +115,8 @@ app
         const result = await collection.insertOne(req.body)
         client.close()
         res.send(result)
-      } else {
+        console.log("response, post: " + JSON.stringify(result))
+      } else { 
         console.log('error: ' + err)
       }
     })

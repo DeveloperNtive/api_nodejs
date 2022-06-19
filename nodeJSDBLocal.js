@@ -14,7 +14,7 @@ let respuesta = {
 
 app
   .route('/usuario')
-  .get((req, res) => {
+  .get((_req, res) => {
     respuesta = {
       error: false,
       codigo: 200,

@@ -6,7 +6,7 @@ app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 
 // Obtener
-app.get('/usuario', (req, res) => {
+app.get('/usuario', (_req, res) => {
  res.send("Usuarios, Method: get")
 })
 // Crear
@@ -15,12 +15,12 @@ app.post('/usuario', (req, res) => {
  res.send(req.body)
 })
 // Actualizar
-app.put('/usuario', (req, res) => {
+app.put('/usuario', (_req, res) => {
  console.log("Usuarios, Method: put")
   res.send(respuesta)
 })
 // Eliminar
-app.delete('/usuario', (req, res) => {
+app.delete('/usuario', (_req, res) => {
  console.log("Usuarios, Method: delete")
   res.send(respuesta)
 })
