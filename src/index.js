@@ -41,7 +41,7 @@ app.get('/', (_req, res) => {
 app.get('/usuario/:id', (_req, res) => {
   client.connect(async err => {
     if (!err) {
-      const collection = client.db('nodejsAPI').collection('usuarios')
+      const collection = client.db(dataBase).collection(coleccion)
       // perform actions on the collection object
       const result = await collection.find({"_id":ObjectId(_req.params.id)}).toArray()
       client.close()
@@ -62,13 +62,13 @@ app.get('/usuario/:id', (_req, res) => {
 app.get('/usuario/votar/ById', (_req, res) => {
   client.connect(async err => {
     if (!err) {
-      const collection = client.db('nodejsAPI').collection('usuarios')
+      const collection = client.db(dataBase).collection(coleccion)
       // perform actions on the collection object
       const result = await collection.find({"_id":ObjectId(_req.body._id)}).toArray()
       // const result = await collection.find({}).toArray()
       client.close()
       res.send(result)
-      console.log(_req.body.item._id)
+      console.log(_req.body._id)
     } else {
       console.log('error: ' + err)
     }
