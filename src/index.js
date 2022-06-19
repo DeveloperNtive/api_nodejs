@@ -3,8 +3,8 @@ const express = require('express')
 const app = express()
 const port = 3000
 // -----------------MongoDB--------------------
-const { MongoClient } = require('mongodb')
-const { uri, client } = require('./DB/mongo')
+const { MongoClient, ObjectId } = require('mongodb')
+const { uri, client, dataBase,  coleccion} = require('./DB/mongo')
 // -----------------MongoDB--------------------
 
 app.use(express.json()) // for parsing application/json
@@ -23,11 +23,11 @@ MongoClient.connect(uri, function (err, db) {
 app.get('/', (req, res) => {
   client.connect(async err => {
     if (!err) {
-      const collection = client.db('nodejsAPI').collection('usuarios')
+      const collection = client.db(dataBase).collection(coleccion)
       // perform actions on the collection object
       const result = await collection.find({}).toArray()
       client.close()
-      res.send(result)
+      res.send(JSON.stringify(result))
     } else {
       console.log('error: ' + err)
     }
@@ -35,11 +35,11 @@ app.get('/', (req, res) => {
 })
 
 app
-  .route('/usuario')
+  .route('/api/usuario')
   .get((req, res) => {
     client.connect(async err => {
       if (!err) {
-        const collection = client.db('nodejsAPI').collection('usuarios')
+        const collection = client.db(dataBase).collection(coleccion)
         // perform actions on the collection object
         const result = await collection.find({}).toArray()
         client.close()
@@ -52,7 +52,7 @@ app
   .post((req, res) => {
     client.connect(async err => {
       if (!err) {
-        const collection = client.db('nodejsAPI').collection('usuarios')
+        const collection = client.db(dataBase).collection(coleccion)
         // perform actions on the collection object
         const result = await collection.insertOne(req.body)
         client.close()
@@ -65,7 +65,7 @@ app
   .put((req, res) => {
     client.connect(async err => {
       if (!err) {
-        const collection = client.db('nodejsAPI').collection('usuarios')
+        const collection = client.db(dataBase).collection(coleccion)
         // perform actions on the collection object
         const result = await collection.updateOne(req.body.item, {
           $set: req.body.newValues
@@ -80,7 +80,12 @@ app
   .delete((req, res) => {
     client.connect(async err => {
       if (!err) {
-        const collection = client.db('nodejsAPI').collection('usuarios')
+        if (req.body.item._id) {
+          console.log('Res: ' + req.body.item._id)
+        }else{
+          console.log('Res: ' + req.body.item.nombre)
+        }
+        const collection = client.db(dataBase).collection(coleccion)
         // perform actions on the collection object
         const result = await collection.deleteOne(req.body.item)
         client.close()
