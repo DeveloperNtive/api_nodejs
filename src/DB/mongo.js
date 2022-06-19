@@ -6,5 +6,7 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1
 })
+const dataBase = 'nodejsAPI'
+const coleccion = 'usuarios'
 
-module.exports = { uri, client }
+module.exports = { uri, client, dataBase,  coleccion}
